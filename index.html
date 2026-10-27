@@ -1,0 +1,873 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Academic Advisor</title>
+<style>
+:root {
+  --bg:#08111f;
+  --panel:#101d30;
+  --panel2:#14243a;
+  --text:#edf4ff;
+  --muted:#9aacc5;
+  --blue:#6ba8ff;
+  --cyan:#57e0d0;
+  --border:#273a53;
+  --green:#64dda1;
+  --orange:#ffc46b;
+  --red:#ff8585;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  line-height:1.5;
+}
+button,input,select {font:inherit}
+button {cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible {
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+.app {max-width:1450px;margin:auto;padding:24px}
+header {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;margin-bottom:24px;
+}
+.brand {display:flex;align-items:center;gap:13px}
+.logo {
+  width:48px;height:48px;border-radius:15px;
+  background:linear-gradient(135deg,#4d8fff,#54e1d0);
+  color:#071321;display:grid;place-items:center;
+  font-size:25px;font-weight:900;
+}
+h1 {font-size:clamp(23px,3vw,34px);margin:0}
+h2 {font-size:19px;margin:0 0 15px}
+h3 {font-size:15px;margin:0 0 8px}
+p {margin:6px 0;color:var(--muted)}
+.eyebrow {
+  text-transform:uppercase;letter-spacing:1.5px;
+  font-size:11px;color:var(--cyan);font-weight:700;
+}
+.actions {display:flex;gap:8px;flex-wrap:wrap}
+.btn {
+  border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;background:var(--panel2);color:var(--text);
+}
+.btn.primary {background:var(--blue);color:#071321;border-color:var(--blue);font-weight:700}
+.btn.danger {color:var(--red)}
+.btn.small {padding:6px 10px;font-size:12px}
+.notice {
+  border:1px solid #294a67;border-radius:12px;padding:12px 15px;
+  background:#10243a;color:#c9dcf6;margin-bottom:20px;font-size:13px;
+}
+.grid {display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.panel {
+  min-width:0;background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:19px;
+}
+.span-12 {grid-column:span 12}
+.span-8 {grid-column:span 8}
+.span-7 {grid-column:span 7}
+.span-6 {grid-column:span 6}
+.span-5 {grid-column:span 5}
+.span-4 {grid-column:span 4}
+.stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat {
+  border:1px solid var(--border);background:var(--panel);
+  border-radius:14px;padding:17px;min-width:0;
+}
+.stat-label {font-size:12px;color:var(--muted)}
+.stat-value {font-size:29px;font-weight:800;margin-top:7px;overflow-wrap:anywhere}
+.stat-sub {font-size:12px;color:var(--muted);margin-top:4px}
+label {display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+input,select {
+  width:100%;background:#091526;border:1px solid var(--border);
+  color:var(--text);border-radius:9px;padding:10px 11px;min-width:0;
+}
+input[type=checkbox] {width:17px;height:17px;accent-color:var(--cyan)}
+.form-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field {min-width:0}
+.subject-list {display:grid;gap:10px}
+.subject {
+  border:1px solid var(--border);border-radius:12px;
+  padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 90px auto;
+  align-items:end;gap:10px;
+}
+.subject-name input {font-weight:700}
+.subject .mark-input {text-align:center}
+.subject-meta {font-size:11px;color:var(--muted);margin-top:5px}
+.add-subject {
+  display:grid;grid-template-columns:minmax(0,1fr) 90px auto;
+  gap:9px;margin-top:13px;align-items:end;
+}
+.progress-track {height:8px;background:#25354b;border-radius:99px;overflow:hidden}
+.progress-fill {height:100%;border-radius:99px;background:var(--cyan);transition:width .25s}
+.subject-row {margin:14px 0}
+.subject-row-top {display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:7px}
+.muted {color:var(--muted)}
+.pill {
+  display:inline-block;border:1px solid var(--border);border-radius:99px;
+  padding:3px 8px;font-size:11px;color:var(--muted);
+}
+.pill.high {color:var(--red);border-color:#74414b}
+.pill.medium {color:var(--orange);border-color:#715b39}
+.pill.low {color:var(--green);border-color:#286a52}
+.plan-list {display:grid;gap:12px}
+.plan-item {
+  border:1px solid var(--border);border-radius:13px;padding:14px;
+  background:#0c192a;
+}
+.plan-item.completed {opacity:.65}
+.plan-top {display:flex;align-items:flex-start;gap:10px}
+.plan-top input {margin-top:3px;flex-shrink:0}
+.plan-main {flex:1;min-width:0}
+.plan-title {font-weight:700}
+.plan-meta {display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.reason {
+  border-left:3px solid var(--cyan);padding:8px 10px;
+  color:#c0d3e9;font-size:12px;background:#11243a;border-radius:0 7px 7px 0;
+}
+.plan-item.completed .plan-title {text-decoration:line-through}
+.chart-wrap {height:235px;position:relative}
+canvas {width:100%;height:100%;display:block}
+.chat-box {
+  height:235px;overflow-y:auto;display:flex;flex-direction:column;
+  gap:10px;padding:4px 0 12px;
+}
+.message {max-width:90%;padding:10px 12px;border-radius:12px;font-size:13px;white-space:pre-wrap}
+.message.bot {background:var(--panel2);border:1px solid var(--border);align-self:flex-start}
+.message.user {background:#244a78;align-self:flex-end}
+.chat-form {display:flex;gap:8px}
+.chat-form input {flex:1}
+.empty {color:var(--muted);font-size:13px;padding:18px 0}
+.footer {text-align:center;font-size:11px;color:var(--muted);padding:24px 0}
+#toast {
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  padding:11px 16px;background:#173a39;border:1px solid #337e72;
+  color:#d8fff5;border-radius:10px;display:none;z-index:5;
+  max-width:90%;font-size:13px;
+}
+@media(max-width:850px) {
+  .span-8,.span-7,.span-6,.span-5,.span-4 {grid-column:span 12}
+  .stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:480px) {
+  .app {padding:13px}
+  .panel {padding:14px}
+  .stats {gap:8px}
+  .stat {padding:12px}
+  .stat-value {font-size:24px}
+  .subject {grid-template-columns:minmax(0,1fr) 70px auto;gap:6px;padding:9px}
+  .add-subject {grid-template-columns:minmax(0,1fr) 70px}
+  .add-subject button {grid-column:span 2}
+  header {align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">A+</div>
+      <div>
+        <div class="eyebrow">Personal learning assistant</div>
+        <h1>AI Academic Advisor</h1>
+        <p>A study plan that adapts as your academic needs change.</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="demoBtn">Load demo data</button>
+      <button class="btn danger" id="resetBtn">Reset data</button>
+    </div>
+  </header>
+
+  <div class="notice">
+    <strong>Adaptive learning demo:</strong>
+    Change a mark, study hours, or exam date to recalculate subject priorities and the study plan.
+    Your information is saved in this browser.
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Average marks</div>
+      <div class="stat-value" id="averageStat">—</div>
+      <div class="stat-sub">Across your subjects</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Subjects needing focus</div>
+      <div class="stat-value" id="focusStat">—</div>
+      <div class="stat-sub">Marks below 75%</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Tasks completed</div>
+      <div class="stat-value" id="completedStat">0%</div>
+      <div class="stat-sub" id="completedSub">0 of 0 tasks</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Days until exam</div>
+      <div class="stat-value" id="daysStat">—</div>
+      <div class="stat-sub" id="daysSub">Set your exam date</div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px">
+    <section class="panel span-5">
+      <h2>Student profile</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="studentName">Student name</label>
+          <input id="studentName" placeholder="Enter your name" maxlength="60">
+        </div>
+        <div class="field">
+          <label for="studyHours">Study hours per day</label>
+          <input id="studyHours" type="number" min="1" max="16" step="0.5" value="3">
+        </div>
+        <div class="field">
+          <label for="attendance">Attendance (%)</label>
+          <input id="attendance" type="number" min="0" max="100" value="85">
+        </div>
+        <div class="field">
+          <label for="examDate">Next exam date</label>
+          <input id="examDate" type="date">
+        </div>
+      </div>
+      <p id="profileMessage" style="margin-top:14px;font-size:12px"></p>
+    </section>
+
+    <section class="panel span-7">
+      <h2>Subject performance</h2>
+      <p style="margin-bottom:14px">Edit your marks from 0 to 100. Priorities update automatically.</p>
+      <div class="subject-list" id="subjectList"></div>
+      <div class="add-subject">
+        <div class="field">
+          <label for="newSubject">New subject</label>
+          <input id="newSubject" placeholder="e.g. Operating Systems" maxlength="70">
+        </div>
+        <div class="field">
+          <label for="newMark">Marks (%)</label>
+          <input id="newMark" type="number" min="0" max="100" value="50">
+        </div>
+        <button class="btn primary" id="addSubjectBtn">Add</button>
+      </div>
+    </section>
+
+    <section class="panel span-6">
+      <h2>Performance overview</h2>
+      <p>Marks by subject</p>
+      <div class="chart-wrap"><canvas id="marksChart"></canvas></div>
+    </section>
+
+    <section class="panel span-6">
+      <h2>Study progress</h2>
+      <p>Completed vs remaining recommended tasks</p>
+      <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+    </section>
+
+    <section class="panel span-12">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div>
+          <h2>Your adaptive study plan</h2>
+          <p id="planSummary">Add subjects to create your plan.</p>
+        </div>
+        <button class="btn primary" id="rebuildBtn">Recalculate plan</button>
+      </div>
+      <div id="planChanges" class="notice" style="margin-top:15px;margin-bottom:15px">
+        Your plan will explain why each subject receives its priority.
+      </div>
+      <div class="plan-list" id="planList"></div>
+    </section>
+
+    <section class="panel span-12">
+      <h2>Ask your academic advisor</h2>
+      <p>Try asking: "What should I study first?" or "How can I improve my average?"</p>
+      <div class="chat-box" id="chatBox" aria-live="polite">
+        <div class="message bot">Hello! I can explain your current study priorities and suggest how to use your available study time. What would you like help with?</div>
+      </div>
+      <form class="chat-form" id="chatForm">
+        <input id="chatInput" placeholder="Ask about your study plan..." maxlength="500" autocomplete="off">
+        <button class="btn primary" type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+  <div class="footer">
+    AI Academic Advisor · Student-focused planning prototype · Data stays in this browser
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  const STORAGE_KEY = "academicAdvisorAdaptiveV2";
+  const $ = id => document.getElementById(id);
+
+  const initialSubjects = [
+    {id:"cn", name:"Computer Networks", mark:48},
+    {id:"bigdata", name:"Big Data Analytics", mark:62},
+    {id:"dbms", name:"Database Management", mark:82},
+    {id:"java", name:"Java Programming", mark:71}
+  ];
+
+  let state = {
+    name:"",
+    hours:3,
+    attendance:85,
+    examDate:"",
+    subjects:[],
+    completed:{},
+    previousPlan:"",
+    lastChange:"Welcome! Your plan will adapt to your marks, study hours, and exam date.",
+    chat:[]
+  };
+  let toastTimer = null;
+  let saveTimer = null;
+
+  function makeId() {
+    return "s" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    })[ch]);
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function numberValue(value, fallback, min, max) {
+    const n = Number(value);
+    return Number.isFinite(n) ? clamp(n,min,max) : fallback;
+  }
+
+  function dateDays(dateString) {
+    if (!dateString) return null;
+    const parts = dateString.split("-").map(Number);
+    if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return null;
+    const exam = Date.UTC(parts[0],parts[1]-1,parts[2]);
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+    return Math.round((exam-today)/86400000);
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      if (!saved || !Array.isArray(saved.subjects)) return false;
+      state = {
+        ...state,
+        ...saved,
+        subjects:saved.subjects.map(s => ({
+          id:String(s.id || makeId()),
+          name:String(s.name || "Subject").slice(0,70),
+          mark:numberValue(s.mark,50,0,100)
+        })),
+        completed:saved.completed && typeof saved.completed === "object" ? saved.completed : {},
+        chat:Array.isArray(saved.chat) ? saved.chat.slice(-12) : []
+      };
+      return true;
+    } catch (e) {
+      console.warn("Could not load saved data",e);
+      return false;
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    } catch (e) {
+      console.warn("Could not save data",e);
+      showToast("Browser storage is unavailable. Your changes may not persist.");
+    }
+  }
+
+  function showToast(message) {
+    $("toast").textContent = message;
+    $("toast").style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $("toast").style.display="none",2600);
+  }
+
+  function average() {
+    if (!state.subjects.length) return null;
+    return state.subjects.reduce((sum,s) => sum+s.mark,0)/state.subjects.length;
+  }
+
+  function priorityScore(subject) {
+    const days = dateDays(state.examDate);
+    const examUrgency = days === null ? 0 : days < 0 ? 0 : days <= 3 ? 18 : days <= 7 ? 12 : days <= 14 ? 7 : 2;
+    const weakMark = (100-subject.mark)*0.75;
+    return weakMark + examUrgency;
+  }
+
+  function priorityInfo(subject) {
+    const score = priorityScore(subject);
+    if (subject.mark < 50) return {label:"High priority",className:"high",score};
+    if (subject.mark < 75) return {label:"Medium priority",className:"medium",score};
+    return {label:"Maintain",className:"low",score};
+  }
+
+  function buildPlan() {
+    const subjects = [...state.subjects].sort((a,b) => priorityScore(b)-priorityScore(a));
+    if (!subjects.length) return [];
+    const hours = numberValue(state.hours,3,1,16);
+    const totalMinutes = Math.round(hours*60);
+    const count = subjects.length;
+    const weightSum = subjects.reduce((sum,s) => sum + Math.max(1,priorityScore(s)),0);
+    let minutesLeft = totalMinutes;
+
+    return subjects.map((s,index) => {
+      let minutes;
+      if (index === count-1) {
+        minutes = Math.max(10,minutesLeft);
+      } else {
+        minutes = Math.max(10,Math.round(totalMinutes*Math.max(1,priorityScore(s))/weightSum/5)*5);
+        minutesLeft -= minutes;
+      }
+      const p = priorityInfo(s);
+      const reasons = [];
+      if (s.mark < 50) reasons.push("marks are below 50%");
+      else if (s.mark < 75) reasons.push("marks are below your 75% target");
+      else reasons.push("marks are at or above your 75% target");
+      const days = dateDays(state.examDate);
+      if (days !== null && days >= 0 && days <= 14) reasons.push("your exam is "+(days===0?"today": "in "+days+" day"+(days===1?"":"s")));
+      const key = s.id;
+      return {
+        id:key,
+        subject:s,
+        minutes,
+        priority:p,
+        reason:reasons.join("; "),
+        task:"Revise key concepts, practise questions, and review mistakes",
+        done:!!state.completed[key]
+      };
+    });
+  }
+
+  function renderProfile() {
+    $("studentName").value = state.name || "";
+    $("studyHours").value = state.hours;
+    $("attendance").value = state.attendance;
+    $("examDate").value = state.examDate || "";
+    $("profileMessage").textContent = state.attendance < 75
+      ? "Your attendance is below 75%. Check your college attendance requirements."
+      : "Your profile helps personalize the suggested study plan.";
+  }
+
+  function renderSubjects() {
+    const list = $("subjectList");
+    if (!state.subjects.length) {
+      list.innerHTML = '<div class="empty">No subjects yet. Add a subject below to start your plan.</div>';
+      return;
+    }
+    list.innerHTML = state.subjects.map(s => {
+      const p = priorityInfo(s);
+      return `
+        <div class="subject">
+          <div class="subject-name">
+            <label for="name-${escapeHTML(s.id)}">Subject name</label>
+            <input id="name-${escapeHTML(s.id)}" data-subject-name="${escapeHTML(s.id)}"
+              value="${escapeHTML(s.name)}" maxlength="70" aria-label="Subject name">
+            <div class="subject-meta"><span class="pill ${p.className}">${p.label}</span></div>
+          </div>
+          <div>
+            <label for="mark-${escapeHTML(s.id)}">Marks %</label>
+            <input class="mark-input" id="mark-${escapeHTML(s.id)}" data-subject-mark="${escapeHTML(s.id)}"
+              type="number" min="0" max="100" value="${s.mark}" aria-label="${escapeHTML(s.name)} marks">
+          </div>
+          <button class="btn small danger" data-delete="${escapeHTML(s.id)}" aria-label="Delete ${escapeHTML(s.name)}">Delete</button>
+        </div>`;
+    }).join("");
+  }
+
+  function renderStats(plan) {
+    const avg = average();
+    $("averageStat").textContent = avg === null ? "—" : avg.toFixed(1)+"%";
+    $("focusStat").textContent = state.subjects.filter(s => s.mark<75).length;
+    const done = plan.filter(t => t.done).length;
+    $("completedStat").textContent = plan.length ? Math.round(done/plan.length*100)+"%" : "0%";
+    $("completedSub").textContent = done+" of "+plan.length+" tasks";
+    const days = dateDays(state.examDate);
+    $("daysStat").textContent = days === null ? "—" : days < 0 ? "Past" : days;
+    $("daysSub").textContent = days === null ? "Set your exam date" : days < 0 ? "Exam date has passed" : days===0 ? "Exam is today" : "Days remaining";
+  }
+
+  function renderPlan(plan) {
+    if (!plan.length) {
+      $("planSummary").textContent = "Add subjects to create your plan.";
+      $("planChanges").textContent = "Add at least one subject to receive personalized recommendations.";
+      $("planList").innerHTML = '<div class="empty">Your recommended study tasks will appear here.</div>';
+      return;
+    }
+    const total = plan.reduce((sum,t) => sum+t.minutes,0);
+    $("planSummary").textContent =
+      "Suggested daily study time: "+Math.floor(total/60)+"h "+(total%60)+"m · "+plan.length+" subject tasks.";
+    $("planChanges").textContent = state.lastChange || "Plan recalculated using your current academic inputs.";
+
+    $("planList").innerHTML = plan.map(t => `
+      <div class="plan-item ${t.done?"completed":""}">
+        <div class="plan-top">
+          <input type="checkbox" data-complete="${escapeHTML(t.id)}" ${t.done?"checked":""}
+            aria-label="Mark ${escapeHTML(t.subject.name)} task complete">
+          <div class="plan-main">
+            <div class="plan-title">${escapeHTML(t.subject.name)}</div>
+            <div class="plan-meta">
+              <span class="pill ${t.priority.className}">${t.priority.label}</span>
+              <span class="pill">${t.minutes} min</span>
+              <span class="pill">${t.subject.mark}% marks</span>
+            </div>
+            <div class="muted" style="font-size:12px;margin-bottom:8px">${escapeHTML(t.task)}</div>
+            <div class="reason"><strong>Why this priority?</strong> ${escapeHTML(t.reason)}.</div>
+          </div>
+        </div>
+      </div>`).join("");
+  }
+
+  function renderAll() {
+    const plan = buildPlan();
+    renderStats(plan);
+    renderSubjects();
+    renderPlan(plan);
+    drawMarksChart();
+    drawProgressChart(plan);
+  }
+
+  function updatePlan(reason) {
+    state.lastChange = reason;
+    saveState();
+    renderAll();
+  }
+
+  function addSubject(name,mark) {
+    const cleaned = name.trim();
+    if (!cleaned) {
+      showToast("Please enter a subject name.");
+      return;
+    }
+    if (state.subjects.some(s => s.name.toLowerCase()===cleaned.toLowerCase())) {
+      showToast("That subject already exists.");
+      return;
+    }
+    state.subjects.push({id:makeId(),name:cleaned,mark:numberValue(mark,50,0,100)});
+    updatePlan("Plan updated: "+cleaned+" was added. Priorities were recalculated across all subjects.");
+    showToast("Subject added and plan recalculated.");
+  }
+
+  function updateSubject(id,changes) {
+    const subject = state.subjects.find(s => s.id===id);
+    if (!subject) return;
+    const oldName = subject.name;
+    const oldMark = subject.mark;
+    if (changes.name !== undefined) {
+      const cleaned = changes.name.trim();
+      if (!cleaned) {
+        showToast("Subject name cannot be empty.");
+        renderSubjects();
+        return;
+      }
+      if (state.subjects.some(s => s.id!==id && s.name.toLowerCase()===cleaned.toLowerCase())) {
+        showToast("Another subject has that name.");
+        renderSubjects();
+        return;
+      }
+      subject.name = cleaned;
+    }
+    if (changes.mark !== undefined) subject.mark = numberValue(changes.mark,subject.mark,0,100);
+    let reason;
+    if (oldMark !== subject.mark) {
+      reason = "Plan changed: "+subject.name+" marks moved from "+oldMark+"% to "+subject.mark+"%. Subject priorities and study-time recommendations were recalculated.";
+    } else if (oldName !== subject.name) {
+      reason = "Plan refreshed after renaming "+oldName+" to "+subject.name+".";
+    } else return;
+    updatePlan(reason);
+  }
+
+  function addMessage(text,who) {
+    state.chat.push({text,who});
+    state.chat = state.chat.slice(-12);
+    const box = $("chatBox");
+    const el = document.createElement("div");
+    el.className = "message "+(who==="user"?"user":"bot");
+    el.textContent = text;
+    box.appendChild(el);
+    while (box.children.length>12) box.removeChild(box.firstChild);
+    box.scrollTop = box.scrollHeight;
+    saveState();
+  }
+
+  function renderChat() {
+    const box = $("chatBox");
+    box.innerHTML = "";
+    if (!state.chat.length) {
+      const greeting = document.createElement("div");
+      greeting.className = "message bot";
+      greeting.textContent = "Hello! Ask me about your study plan or subject priorities.";
+      box.appendChild(greeting);
+    } else {
+      state.chat.forEach(m => {
+        const el = document.createElement("div");
+        el.className = "message "+(m.who==="user"?"user":"bot");
+        el.textContent = m.text;
+        box.appendChild(el);
+      });
+    }
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function advisorReply(question) {
+    const q = question.toLowerCase();
+    const plan = buildPlan();
+    if (!state.subjects.length) return "Add your subjects and marks first. Then I can suggest which subject to study first.";
+    if (q.includes("first") || q.includes("priority") || q.includes("weak") || q.includes("focus")) {
+      const t = plan[0];
+      return "Your first recommended subject is "+t.subject.name+" ("+t.subject.mark+"%). "+t.reason+". Try spending "+t.minutes+" minutes on revision and practice questions.";
+    }
+    if (q.includes("average") || q.includes("marks") || q.includes("score")) {
+      return "Your current average is "+average().toFixed(1)+"%. "+state.subjects.filter(s=>s.mark<75).length+" subject(s) are below your 75% target. Focus on the lowest-mark subject first, then practise questions and review mistakes.";
+    }
+    if (q.includes("time") || q.includes("hour") || q.includes("schedule") || q.includes("plan")) {
+      return "You have "+state.hours+" study hour(s) per day. Your current plan suggests: "+plan.map(t=>t.subject.name+" ("+t.minutes+" min)").join(", ")+". Change your available hours or exam date to recalculate it.";
+    }
+    if (q.includes("attendance")) {
+      return "Your entered attendance is "+state.attendance+"%. "+(state.attendance<75?"This is below 75%, so check your institution's attendance rules and make a plan to attend upcoming classes.":"Keep attending classes consistently and check your institution's requirements.");
+    }
+    if (q.includes("exam")) {
+      const days = dateDays(state.examDate);
+      if (days===null) return "Please set your next exam date in Student profile so the plan can account for the time remaining.";
+      if (days<0) return "The exam date entered is in the past. Update it to your next exam date to recalculate priorities.";
+      return days===0 ? "Your exam is today. Review key notes and formulas, and avoid starting too many new topics." : "You have "+days+" day(s) until your exam. Prioritize weak subjects, practise questions, and review mistakes.";
+    }
+    if (q.includes("improve") || q.includes("better") || q.includes("advice") || q.includes("help")) {
+      const low = [...state.subjects].sort((a,b)=>a.mark-b.mark)[0];
+      return "A practical next step is to study "+low.name+", currently at "+low.mark+"%. Break revision into short sessions, solve practice questions, and review incorrect answers. Mark the task complete when finished, then update your marks after a new assessment.";
+    }
+    return "Based on your current inputs, start with "+plan[0].subject.name+" ("+plan[0].subject.mark+"%). Your recommendations are generated from your entered marks, study hours, and exam date. Try asking about priorities, marks, study time, attendance, or exams.";
+  }
+
+  function prepareCanvas(id) {
+    const canvas = $(id);
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.max(1,window.devicePixelRatio||1);
+    canvas.width = Math.max(1,Math.round(rect.width*ratio));
+    canvas.height = Math.max(1,Math.round(rect.height*ratio));
+    const ctx = canvas.getContext("2d");
+    ctx.scale(ratio,ratio);
+    return {canvas,ctx,w:rect.width,h:rect.height};
+  }
+
+  function drawMarksChart() {
+    const {ctx,w,h} = prepareCanvas("marksChart");
+    ctx.clearRect(0,0,w,h);
+    if (!state.subjects.length) {
+      ctx.fillStyle="#9aacc5";ctx.font="13px Arial";ctx.fillText("Add subjects to view marks.",10,25);
+      return;
+    }
+    const left=34,right=12,top=15,bottom=52;
+    const chartW=w-left-right,chartH=h-top-bottom;
+    ctx.font="10px Arial";
+    [0,25,50,75,100].forEach(v=>{
+      const y=top+chartH-(v/100)*chartH;
+      ctx.strokeStyle="#273a53";ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();
+      ctx.fillStyle="#9aacc5";ctx.fillText(v,left-26,y+3);
+    });
+    const gap=chartW/state.subjects.length;
+    const bw=Math.min(40,gap*0.56);
+    state.subjects.forEach((s,i)=>{
+      const x=left+gap*i+(gap-bw)/2;
+      const bh=chartH*s.mark/100;
+      ctx.fillStyle=s.mark<50?"#ff8585":s.mark<75?"#ffc46b":"#57e0d0";
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x,top+chartH-bh,bw,bh,5);
+      else ctx.rect(x,top+chartH-bh,bw,bh);
+      ctx.fill();
+      ctx.fillStyle="#edf4ff";ctx.font="10px Arial";
+      ctx.textAlign="center";ctx.fillText(s.mark+"%",x+bw/2,top+chartH-bh-5);
+      ctx.fillStyle="#9aacc5";
+      const label=s.name.length>10?s.name.slice(0,9)+"…":s.name;
+      ctx.fillText(label,x+bw/2,top+chartH+16);
+    });
+    ctx.textAlign="left";
+  }
+
+  function drawProgressChart(plan) {
+    const {ctx,w,h} = prepareCanvas("progressChart");
+    ctx.clearRect(0,0,w,h);
+    const done=plan.filter(t=>t.done).length;
+    const remaining=plan.length-done;
+    const total=plan.length;
+    if (!total) {
+      ctx.fillStyle="#9aacc5";ctx.font="13px Arial";ctx.fillText("Add subjects to track study tasks.",10,25);
+      return;
+    }
+    const cx=w/2,cy=h/2-8,r=Math.min(w*0.22,h*0.32),line=Math.max(15,r*0.28);
+    ctx.lineWidth=line;
+    ctx.strokeStyle="#273a53";ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+    if (done>0) {
+      ctx.strokeStyle="#57e0d0";ctx.lineCap="round";
+      ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*done/total);ctx.stroke();
+    }
+    ctx.lineCap="butt";
+    ctx.fillStyle="#edf4ff";ctx.font="bold 24px Arial";ctx.textAlign="center";
+    ctx.fillText(Math.round(done/total*100)+"%",cx,cy+7);
+    ctx.fillStyle="#9aacc5";ctx.font="12px Arial";ctx.fillText("completed",cx,cy+25);
+    const legendY=h-19;
+    ctx.textAlign="left";
+    ctx.fillStyle="#57e0d0";ctx.fillRect(cx-85,legendY-9,9,9);
+    ctx.fillStyle="#edf4ff";ctx.font="11px Arial";ctx.fillText("Done: "+done,cx-71,legendY);
+    ctx.fillStyle="#273a53";ctx.fillRect(cx+15,legendY-9,9,9);
+    ctx.fillStyle="#edf4ff";ctx.fillText("Left: "+remaining,cx+29,legendY);
+  }
+
+  function loadDemo() {
+    state.name = "Demo Student";
+    state.hours = 3;
+    state.attendance = 85;
+    const d = new Date();
+    d.setDate(d.getDate()+14);
+    state.examDate = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    state.subjects = initialSubjects.map(s=>({...s}));
+    state.completed = {};
+    state.chat = [];
+    state.lastChange = "Demo loaded: Computer Networks has low marks, so it receives high study priority. Change marks to see the plan adapt.";
+    renderProfile();
+    renderChat();
+    saveState();
+    renderAll();
+    showToast("Demo loaded. Try changing Computer Networks to 80%.");
+  }
+
+  function resetAll() {
+    if (!confirm("Reset all saved profile, subjects, task progress, and chat data?")) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    state = {
+      name:"",hours:3,attendance:85,examDate:"",
+      subjects:[],completed:{},previousPlan:"",
+      lastChange:"Your data has been reset. Add subjects to create a new plan.",chat:[]
+    };
+    renderProfile();
+    renderChat();
+    renderAll();
+    saveState();
+    showToast("Your project data has been reset.");
+  }
+
+  $("studentName").addEventListener("input",e=>{
+    state.name=e.target.value;
+    saveState();
+  });
+
+  $("studyHours").addEventListener("input",e=>{
+    state.hours=numberValue(e.target.value,3,1,16);
+    updatePlan("Plan changed because your available study hours changed to "+state.hours+" per day.");
+  });
+
+  $("attendance").addEventListener("input",e=>{
+    state.attendance=numberValue(e.target.value,85,0,100);
+    $("profileMessage").textContent=state.attendance<75
+      ?"Your attendance is below 75%. Check your college attendance requirements."
+      :"Your profile helps personalize the suggested study plan.";
+    saveState();
+  });
+
+  $("examDate").addEventListener("change",e=>{
+    state.examDate=e.target.value;
+    const days=dateDays(state.examDate);
+    updatePlan("Plan changed because your exam date was updated"+(days===null?".":days<0?" to a past date.":"; "+days+" day(s) remain.") );
+  });
+
+  $("subjectList").addEventListener("change",e=>{
+    const markId=e.target.dataset.subjectMark;
+    const nameId=e.target.dataset.subjectName;
+    if (markId) {
+      const subject=state.subjects.find(s=>s.id===markId);
+      if (!subject) return;
+      updateSubject(markId,{mark:numberValue(e.target.value,subject.mark,0,100)});
+    }
+    if (nameId) updateSubject(nameId,{name:e.target.value});
+  });
+
+  $("subjectList").addEventListener("click",e=>{
+    const id=e.target.dataset.delete;
+    if (!id) return;
+    const subject=state.subjects.find(s=>s.id===id);
+    if (!subject) return;
+    state.subjects=state.subjects.filter(s=>s.id!==id);
+    delete state.completed[id];
+    updatePlan("Plan updated: "+subject.name+" was removed. Remaining subject priorities were recalculated.");
+    showToast("Subject removed.");
+  });
+
+  $("addSubjectBtn").addEventListener("click",()=>{
+    addSubject($("newSubject").value,$("newMark").value);
+    $("newSubject").value="";
+    $("newMark").value="50";
+  });
+
+  $("newSubject").addEventListener("keydown",e=>{
+    if (e.key==="Enter") {
+      e.preventDefault();
+      $("addSubjectBtn").click();
+    }
+  });
+
+  $("planList").addEventListener("change",e=>{
+    const id=e.target.dataset.complete;
+    if (!id) return;
+    state.completed[id]=e.target.checked;
+    updatePlan(e.target.checked
+      ?"Progress updated: a study task was marked complete. Your completion rate has been updated."
+      :"Progress updated: a study task was marked incomplete.");
+  });
+
+  $("rebuildBtn").addEventListener("click",()=>{
+    updatePlan("Plan manually recalculated from your current marks, available study hours, and exam date.");
+    showToast("Study plan recalculated.");
+  });
+
+  $("demoBtn").addEventListener("click",()=>{
+    if (confirm("Load demo data? This replaces the current profile and subject list.")) loadDemo();
+  });
+
+  $("resetBtn").addEventListener("click",resetAll);
+
+  $("chatForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const input=$("chatInput");
+    const question=input.value.trim();
+    if (!question) return;
+    addMessage(question,"user");
+    input.value="";
+    addMessage(advisorReply(question),"bot");
+  });
+
+  window.addEventListener("resize",()=>{
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      drawMarksChart();
+      drawProgressChart(buildPlan());
+    },100);
+  });
+
+  const hadSavedData=loadState();
+  if (!hadSavedData) {
+    state.subjects=initialSubjects.map(s=>({...s}));
+    state.lastChange="Welcome! Sample data is loaded. Change a subject mark or study hours to see your plan adapt.";
+  }
+  renderProfile();
+  renderChat();
+  renderAll();
+  saveState();
+})();
+</script>
+</body>
+</html>
